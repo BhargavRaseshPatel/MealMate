@@ -1,50 +1,92 @@
-# Welcome to your Expo app 👋
+# MealMate
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+MealMate is a mobile application that connects customers with chefs to order and prepare meals. It allows customers to browse available meals, place orders, and view order statuses, while chefs can receive orders, prepare meals, and update the app on meal progress.
 
-## Get started
+## Features
 
-1. Install dependencies
+### Customer Side:
+- Browse Menu: View meal options with descriptions, images, and pricing.
+- Order Meal: Select meals, customize options (if available), and add to cart.
+- Order Status: View the current status of orders (e.g., "Preparing", "Ready for Pickup").
+- Order History: View past orders and reorder favorite meals.
+- Rating & Feedback: Leave ratings and feedback on meals and chefs.
 
+### Chef Side:
+- View Orders: See incoming orders with details (meal, customization, customer info).
+- Update Status: Mark meals as being prepared, cooked, or ready for pickup.
+- Manage Menu: Update available meals, prices, and customization options.
+- Receive Feedback: See ratings and feedback for meals prepared.
+
+## Technology Stack
+
+- **Frontend**: React Native Expo (cross-platform app development)
+- **Backend**: Appwrite (for user management, data storage, and authentication)
+- **Database**: Appwrite Database
+- **Version Control**: Git
+- **APIs**: Google Maps API (for route calculations)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm or yarn
+- Expo CLI
+- Appwrite account
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/mealmate.git
+   cd mealmate
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Configure Appwrite:
+   - Create an Appwrite project
+   - Create a database and collections as per the schema
+   - Update the Appwrite configuration in `services/appwrite.js`
 
+4. Start the development server:
    ```bash
-    npx expo start
+   npm start
+   ```
+   or
+   ```bash
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+5. Run on a device or emulator:
+   - Scan the QR code with the Expo Go app on your device
+   - Press 'a' to run on an Android emulator
+   - Press 'i' to run on an iOS simulator
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Database Schema
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+The application uses the following database collections in Appwrite:
 
-## Get a fresh project
+- Customer
+- Chef
+- Menu
+- Category
+- Items
+- Chef_Menu
+- Chef_Item
+- Weekly_Menu
+- Subscription
+- Customer_Subscription
+- Order
+- Subscription_Order
+- Feedback
+- Wallet
+- Transaction_History
+- Delivery_Address
 
-When you're ready, run:
+## Contributing
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Contributions are welcome! Please feel free to submit a Pull Request.

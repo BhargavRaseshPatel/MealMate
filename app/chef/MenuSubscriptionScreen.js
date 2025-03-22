@@ -17,6 +17,7 @@ export default function MenuSubscriptionScreen({ navigation }) {
   const [categories, setCategories] = useState([]);
   const [menus, setMenus] = useState([]);
   const [items, setItems] = useState([]);
+  const [chefMenus, setChefMenus] = useState([]);
   const [showMenuItems, setShowMenuItems] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -25,16 +26,39 @@ export default function MenuSubscriptionScreen({ navigation }) {
 
   useEffect(() => {
     fetchData();
-  }, []); // Empty dependency array means this runs once when component mounts
+  }, []);
 
   const fetchData = async () => {
     try {
+      // Get current user's ID
+      const user = await account.get();
+      const personId = user.$id;
+
+      // Get chef document for current user
+      const chefQuery = await databases.listDocuments(
+        DATABASE_ID,
+        CHEF_COLLECTION_ID,
+        [Query.equal('person_id', personId)]
+      );
+
+      if (chefQuery.documents.length > 0) {
+        const chefId = chefQuery.documents[0].$id;
+        
+        // Fetch chef's menus
+        const chefMenusResponse = await databases.listDocuments(
+          DATABASE_ID,
+          CHEF_MENU_COLLECTION_ID,
+          [Query.equal('chef', chefId)]
+        );
+        console.log('Chef Menus:', chefMenusResponse.documents);
+        setChefMenus(chefMenusResponse.documents);
+      }
+
       // Fetch categories
       const categoriesResponse = await databases.listDocuments(
         DATABASE_ID,
         CATEGORY_COLLECTION_ID
       );
-      console.log('Categories:', categoriesResponse.documents);
       setCategories(categoriesResponse.documents);
 
       // Fetch menus
@@ -42,7 +66,6 @@ export default function MenuSubscriptionScreen({ navigation }) {
         DATABASE_ID,
         MENU_COLLECTION_ID
       );
-      console.log('Menus:', menusResponse.documents);
       setMenus(menusResponse.documents);
 
       // Fetch items
@@ -50,7 +73,6 @@ export default function MenuSubscriptionScreen({ navigation }) {
         DATABASE_ID,
         ITEMS_COLLECTION_ID
       );
-      console.log('Items:', itemsResponse.documents);
       setItems(itemsResponse.documents);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -224,25 +246,23 @@ export default function MenuSubscriptionScreen({ navigation }) {
                 <View key={category.$id} style={styles.categorySection}>
                   <Text style={styles.categoryTitle}>{category.category_name}</Text>
                   {categoryMenus.length > 0 ? (
-                    categoryMenus.map(menu => {
-                      return (
-                        <TouchableOpacity 
-                          key={menu.$id} 
-                          style={styles.menuCard}
-                          onPress={() => handleMenuPress(menu)}
-                        >
-                          <Image 
-                            source={{ uri: menu.image_url }} 
-                            style={styles.menuImage}
-                          />
-                          <View style={styles.menuInfo}>
-                            <Text style={styles.menuName}>{menu.menu_name}</Text>
-                            <Text style={styles.menuDescription}>{menu.description}</Text>
-                            <Text style={styles.menuPrice}>${menu.price}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })
+                    categoryMenus.map(menu => (
+                      <TouchableOpacity 
+                        key={menu.$id} 
+                        style={styles.menuCard}
+                        onPress={() => handleMenuPress(menu)}
+                      >
+                        <Image 
+                          source={{ uri: menu.image_url }} 
+                          style={styles.menuImage}
+                        />
+                        <View style={styles.menuInfo}>
+                          <Text style={styles.menuName}>{menu.menu_name}</Text>
+                          <Text style={styles.menuDescription}>{menu.description}</Text>
+                          <Text style={styles.menuPrice}>${menu.price}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))
                   ) : (
                     <View style={styles.emptyState}>
                       <Text style={styles.emptyStateText}>No menus in this category</Text>
@@ -252,8 +272,36 @@ export default function MenuSubscriptionScreen({ navigation }) {
               );
             })
           ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No menu items added yet</Text>
+            <View>
+              {chefMenus.length > 0 ? (
+                chefMenus.map(menu => (
+                  <TouchableOpacity 
+                    key={menu.$id} 
+                    style={styles.menuCard}
+                    onPress={() => handleMenuPress(menu)}
+                  >
+                    <View style={styles.menuInfo}>
+                      <Text style={styles.menuName}>{menu.menu_name}</Text>
+                      <Text style={styles.menuDescription}>{menu.description}</Text>
+                      <Text style={styles.menuPrice}>${menu.price}</Text>
+                      <View style={styles.itemsList}>
+                        {menu.chefItem.map((itemId, index) => {
+                          const item = items.find(i => i.$id === itemId);
+                          return item ? (
+                            <Text key={index} style={styles.itemText}>
+                              • {item.item_name} ({item.quantity} {item.measurement_unit})
+                            </Text>
+                          ) : null;
+                        })}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>No menu items added yet</Text>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -514,5 +562,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  itemsList: {
+    marginTop: 10,
+  },
+  itemText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 3,
   },
 }); 

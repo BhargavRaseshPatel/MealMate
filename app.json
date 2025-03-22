@@ -18,9 +18,6 @@
     },
     "web": {
     },
-    "scheme": "mealmate",
-    "plugins": [
-      "expo-router"
-    ]
+    "scheme": "mealmate"
   }
 }

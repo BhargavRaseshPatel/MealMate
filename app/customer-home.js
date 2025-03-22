@@ -26,6 +26,10 @@ export default function CustomerHomeScreen({ navigation }) {
     }
   };
 
+  const handleNavigateToCustomerTabs = () => {
+    navigation.navigate('CustomerTabLayout');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -43,7 +47,13 @@ export default function CustomerHomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <Text>Welcome to MealMate</Text>
+        <Text style={styles.welcomeText}>Welcome to MealMate</Text>
+        <TouchableOpacity 
+          style={styles.navigateButton}
+          onPress={handleNavigateToCustomerTabs}
+        >
+          <Text style={styles.navigateButtonText}>Go to Customer Section</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -73,6 +83,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+  },
+  welcomeText: {
+    fontSize: 20,
+    color: '#666',
+    marginBottom: 30,
+  },
+  navigateButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+  },
+  navigateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   logoutButton: {
     backgroundColor: '#ff6b6b',

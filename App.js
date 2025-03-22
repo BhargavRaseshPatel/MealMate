@@ -6,6 +6,8 @@ import SignupScreen from './app/signup';
 import RoleSelectionScreen from './app/role-selection';
 import CustomerHomeScreen from './app/customer-home';
 import ChefHomeScreen from './app/chef-home';
+import CustomerTabLayout from './app/CustomerTabLayout';
+import ChefTabLayout from './app/ChefTabLayout';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +20,8 @@ export default function App() {
         <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
         <Stack.Screen name="customer-home" component={CustomerHomeScreen} />
         <Stack.Screen name="chef-home" component={ChefHomeScreen} />
+        <Stack.Screen name="CustomerTabLayout" component={CustomerTabLayout} />
+        <Stack.Screen name="ChefTabLayout" component={ChefTabLayout} />
       </Stack.Navigator>
     </NavigationContainer>
   );

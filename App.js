@@ -8,6 +8,7 @@ import CustomerHomeScreen from './app/customer-home';
 import ChefHomeScreen from './app/chef-home';
 import CustomerTabLayout from './app/CustomerTabLayout';
 import ChefTabLayout from './app/ChefTabLayout';
+import AddMenuScreen from './app/chef/AddMenuScreen';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,7 @@ export default function App() {
         <Stack.Screen name="chef-home" component={ChefHomeScreen} />
         <Stack.Screen name="CustomerTabLayout" component={CustomerTabLayout} />
         <Stack.Screen name="ChefTabLayout" component={ChefTabLayout} />
+        <Stack.Screen name="AddMenu" component={AddMenuScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

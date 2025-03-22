@@ -9,6 +9,7 @@ import ChefHomeScreen from './app/chef-home';
 import CustomerTabLayout from './app/CustomerTabLayout';
 import ChefTabLayout from './app/ChefTabLayout';
 import AddMenuScreen from './app/chef/AddMenuScreen';
+import AddSubscriptionScreen from './app/chef/AddSubscriptionScreen';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="CustomerTabLayout" component={CustomerTabLayout} />
         <Stack.Screen name="ChefTabLayout" component={ChefTabLayout} />
         <Stack.Screen name="AddMenu" component={AddMenuScreen} />
+        <Stack.Screen name="AddSubscription" component={AddSubscriptionScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

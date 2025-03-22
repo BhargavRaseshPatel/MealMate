@@ -2,45 +2,40 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function OrdersScreen() {
-  const [activeTab, setActiveTab] = useState('today');
+export default function OrderHistoryScreen() {
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  // Mock data for orders
-  const todayOrders = [
+  // Mock data for order history
+  const orderHistory = [
     {
       id: '1',
-      type: 'Today\'s Order',
+      date: '2024-03-15',
       time: '12:30 PM',
       items: ['Butter Chicken', 'Naan', 'Rice'],
-      status: 'Preparing',
+      status: 'Delivered',
       chef: 'Chef Raj',
+      amount: '₹450',
+      rating: 4.5,
     },
     {
       id: '2',
-      type: 'Today\'s Order',
+      date: '2024-03-14',
       time: '7:00 PM',
       items: ['Paneer Tikka', 'Roti', 'Dal'],
-      status: 'Confirmed',
+      status: 'Delivered',
       chef: 'Chef Priya',
+      amount: '₹350',
+      rating: 5,
     },
-  ];
-
-  const upcomingOrders = [
     {
       id: '3',
-      date: 'Tomorrow',
+      date: '2024-03-13',
       time: '1:00 PM',
       items: ['Biryani', 'Raita', 'Salad'],
-      status: 'Scheduled',
+      status: 'Cancelled',
       chef: 'Chef Amit',
-    },
-    {
-      id: '4',
-      date: 'Next Day',
-      time: '8:00 PM',
-      items: ['Kebab Platter', 'Naan', 'Chutney'],
-      status: 'Scheduled',
-      chef: 'Chef Neha',
+      amount: '₹400',
+      rating: null,
     },
   ];
 
@@ -48,10 +43,15 @@ export default function OrdersScreen() {
     <TouchableOpacity key={order.id} style={styles.orderCard}>
       <View style={styles.orderHeader}>
         <View>
-          <Text style={styles.orderType}>{order.type || 'Upcoming Order'}</Text>
           <Text style={styles.orderDate}>
-            {order.date || 'Today'} • {order.time}
+            {new Date(order.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </Text>
+          <Text style={styles.orderTime}>{order.time}</Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) }]}>
           <Text style={styles.statusText}>{order.status}</Text>
@@ -71,18 +71,28 @@ export default function OrdersScreen() {
             </View>
           ))}
         </View>
+        <View style={styles.orderFooter}>
+          <View style={styles.amountContainer}>
+            <Ionicons name="cash-outline" size={16} color="#666" />
+            <Text style={styles.amountText}>{order.amount}</Text>
+          </View>
+          {order.rating && (
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={16} color="#FFD700" />
+              <Text style={styles.ratingText}>{order.rating}</Text>
+            </View>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'preparing':
-        return '#FFA500';
-      case 'confirmed':
+      case 'delivered':
         return '#4CAF50';
-      case 'scheduled':
-        return '#2196F3';
+      case 'cancelled':
+        return '#F44336';
       default:
         return '#666';
     }
@@ -91,31 +101,40 @@ export default function OrdersScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Orders</Text>
+        <Text style={styles.title}>Order History</Text>
       </View>
 
-      <View style={styles.tabContainer}>
+      <View style={styles.filterContainer}>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'today' && styles.activeTab]}
-          onPress={() => setActiveTab('today')}
+          style={[styles.filterButton, activeFilter === 'all' && styles.activeFilter]}
+          onPress={() => setActiveFilter('all')}
         >
-          <Text style={[styles.tabText, activeTab === 'today' && styles.activeTabText]}>
-            Today's Orders
+          <Text style={[styles.filterText, activeFilter === 'all' && styles.activeFilterText]}>
+            All Orders
           </Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'upcoming' && styles.activeTab]}
-          onPress={() => setActiveTab('upcoming')}
+          style={[styles.filterButton, activeFilter === 'delivered' && styles.activeFilter]}
+          onPress={() => setActiveFilter('delivered')}
         >
-          <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>
-            Upcoming
+          <Text style={[styles.filterText, activeFilter === 'delivered' && styles.activeFilterText]}>
+            Delivered
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.filterButton, activeFilter === 'cancelled' && styles.activeFilter]}
+          onPress={() => setActiveFilter('cancelled')}
+        >
+          <Text style={[styles.filterText, activeFilter === 'cancelled' && styles.activeFilterText]}>
+            Cancelled
           </Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
-        {activeTab === 'today' && todayOrders.map(renderOrderCard)}
-        {activeTab === 'upcoming' && upcomingOrders.map(renderOrderCard)}
+        {orderHistory
+          .filter(order => activeFilter === 'all' || order.status.toLowerCase() === activeFilter)
+          .map(renderOrderCard)}
       </ScrollView>
     </SafeAreaView>
   );
@@ -136,27 +155,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  tabContainer: {
+  filterContainer: {
     flexDirection: 'row',
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    backgroundColor: '#f5f5f5',
   },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#FF6B6B',
+  activeFilter: {
+    backgroundColor: '#FF6B6B',
   },
-  tabText: {
+  filterText: {
     fontSize: 14,
     color: '#666',
   },
-  activeTabText: {
-    fontWeight: 'bold',
-    color: '#FF6B6B',
+  activeFilterText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   content: {
     flex: 1,
@@ -182,13 +203,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  orderType: {
+  orderDate: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
     marginBottom: 4,
   },
-  orderDate: {
+  orderTime: {
     fontSize: 14,
     color: '#666',
   },
@@ -229,5 +250,33 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#333',
+  },
+  orderFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  amountText: {
+    marginLeft: 4,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#666',
   },
 }); 

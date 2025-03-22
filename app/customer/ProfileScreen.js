@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { logout, getCurrentUser } from '../../services/appwrite';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -62,7 +62,8 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
       </View>
-      <View style={styles.content}>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle-outline" size={80} color="#FF6B6B" />
@@ -78,10 +79,13 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="wallet-outline" size={24} color="#FF6B6B" />
             <View style={styles.walletTextContainer}>
               <Text style={styles.walletLabel}>Wallet Balance</Text>
-              <Text style={styles.walletAmount}>₹{userData?.wallet}</Text>
+              <Text style={styles.walletAmount}>${userData?.wallet}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.addMoneyButton}>
+          <TouchableOpacity 
+            style={styles.addMoneyButton}
+            onPress={() => navigation.navigate('Transaction')}
+          >
             <Text style={styles.addMoneyButtonText}>Add Money</Text>
           </TouchableOpacity>
         </View>
@@ -106,13 +110,35 @@ export default function ProfileScreen({ navigation }) {
         </View>
 
         <TouchableOpacity 
+          style={styles.transactionButton}
+          onPress={() => navigation.navigate('Transaction')}
+        >
+          <View style={styles.transactionButtonContent}>
+            <Ionicons name="swap-horizontal-outline" size={24} color="#FF6B6B" />
+            <Text style={styles.transactionButtonText}>Transaction History</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.feedbackButton}
+          onPress={() => navigation.navigate('Feedback')}
+        >
+          <View style={styles.feedbackButtonContent}>
+            <Ionicons name="star-outline" size={24} color="#FF6B6B" />
+            <Text style={styles.feedbackButtonText}>Rate Your Orders</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
           style={styles.logoutButton}
           onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={20} color="#fff" style={styles.logoutIcon} />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -142,8 +168,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  content: {
     padding: 20,
   },
   profileHeader: {
@@ -239,6 +267,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontWeight: '500',
+  },
+  transactionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  transactionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  transactionButtonText: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  feedbackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  feedbackButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  feedbackButtonText: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
   logoutButton: {
     backgroundColor: '#FF6B6B',

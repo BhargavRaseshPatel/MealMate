@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { logout, getCurrentUser } from '../../services/appwrite';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -46,6 +46,10 @@ export default function ChefProfileScreen({ navigation }) {
     }
   };
 
+  const handleOrderHistory = () => {
+    navigation.navigate('OrderHistory');
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -62,7 +66,7 @@ export default function ChefProfileScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
       </View>
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle-outline" size={80} color="#FF6B6B" />
@@ -106,13 +110,24 @@ export default function ChefProfileScreen({ navigation }) {
         </View>
 
         <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={handleOrderHistory}
+        >
+          <View style={styles.actionButtonContent}>
+            <Ionicons name="time-outline" size={24} color="#FF6B6B" />
+            <Text style={styles.actionButtonText}>Order History</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
           style={styles.logoutButton}
           onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={20} color="#fff" style={styles.logoutIcon} />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -121,6 +136,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -141,10 +162,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
   },
   profileHeader: {
     flexDirection: 'row',
@@ -240,6 +257,33 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  actionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
   logoutButton: {
     backgroundColor: '#FF6B6B',
     paddingVertical: 15,
@@ -247,6 +291,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
   logoutIcon: {
     marginRight: 10,

@@ -6,8 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import ChefHomeScreen from './chef/ChefHomeScreen';
 import FutureOrdersScreen from './chef/FutureOrdersScreen';
 import MenuSubscriptionScreen from './chef/MenuSubscriptionScreen';
-import OrderHistoryScreen from './chef/OrderHistoryScreen';
+import WeeklyMenuScreen from './chef/WeeklyMenuScreen';
 import ChefProfileScreen from './chef/ChefProfileScreen';
+import OrderHistoryScreen from './chef/OrderHistoryScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,8 +25,8 @@ export default function ChefTabLayout() {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'MenuSubscription') {
             iconName = focused ? 'restaurant' : 'restaurant-outline';
-          } else if (route.name === 'OrderHistory') {
-            iconName = focused ? 'time' : 'time-outline';
+          } else if (route.name === 'WeeklyMenu') {
+            iconName = focused ? 'list' : 'list-outline';
           } else if (route.name === 'ChefProfile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -53,14 +54,22 @@ export default function ChefTabLayout() {
         options={{ title: 'Menu & Subscriptions' }}
       />
       <Tab.Screen 
-        name="OrderHistory" 
-        component={OrderHistoryScreen}
-        options={{ title: 'History' }}
+        name="WeeklyMenu" 
+        component={WeeklyMenuScreen}
+        options={{ title: 'Weekly Menu' }}
       />
       <Tab.Screen 
         name="ChefProfile" 
         component={ChefProfileScreen}
         options={{ title: 'Profile' }}
+      />
+      <Tab.Screen 
+        name="OrderHistory" 
+        component={OrderHistoryScreen}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
+        }}
       />
     </Tab.Navigator>
   );

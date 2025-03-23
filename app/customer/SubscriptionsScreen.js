@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   },
   subscribeButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
   emptyState: {

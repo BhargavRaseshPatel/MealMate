@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { login, getUserRole } from '../services/appwrite';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -85,43 +86,50 @@ export default function LoginScreen({ navigation }) {
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>MealMate</Text>
-            <Text style={styles.subtitle}>Connect with chefs for delicious meals</Text>
-          </View>
+          <View style={styles.mainContainer}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logoCircle}>
+                <Ionicons name="restaurant" size={40} color="#FF6B6B" />
+              </View>
+            </View>
 
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Login</Text>
-            
-            <InputField 
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              error={errors.email}
-            />
-            
-            <InputField 
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              error={errors.password}
-            />
-            
-            <Button 
-              title="Login" 
-              onPress={handleLogin} 
-              loading={loading}
-            />
-            
-            <View style={styles.footerContainer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                <Text style={styles.footerLink}>Sign Up</Text>
-              </TouchableOpacity>
+            <View style={styles.header}>
+              <Text style={styles.title}>MealMate</Text>
+              <Text style={styles.subtitle}>Connect with chefs for delicious meals</Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              <Text style={styles.loginTitle}>Login</Text>
+              <InputField 
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                error={errors.email}
+              />
+              
+              <InputField 
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter your password"
+                secureTextEntry
+                error={errors.password}
+              />
+              
+              <Button 
+                title="Login" 
+                onPress={handleLogin} 
+                loading={loading}
+              />
+              
+              <View style={styles.footerContainer}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                  <Text style={styles.footerLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -141,15 +149,28 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingBottom: 30,
+  },
+  mainContainer: {
+    paddingTop: 40,
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFF0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   header: {
     alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 40,
+    marginBottom: 30,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FF6B6B',
     marginBottom: 10,
@@ -162,11 +183,11 @@ const styles = StyleSheet.create({
   formContainer: {
     width: '100%',
   },
-  formTitle: {
+  loginTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 24,
     color: '#333',
+    marginBottom: 20,
   },
   footerContainer: {
     flexDirection: 'row',

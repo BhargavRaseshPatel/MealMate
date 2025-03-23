@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function OrdersScreen() {
+export default function OrdersScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('today');
 
   // Mock data for orders
@@ -91,7 +91,16 @@ export default function OrdersScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Orders</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>My Orders</Text>
+          <TouchableOpacity 
+            style={styles.createOrderButton}
+            onPress={() => navigation.navigate('BrowseMeals')}
+          >
+            <Ionicons name="add-circle-outline" size={20} color="#fff" />
+            <Text style={styles.createOrderButtonText}>Create New Order</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.tabContainer}>
@@ -127,9 +136,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    padding: 20,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
@@ -229,5 +243,30 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: '#333',
+  },
+  createOrderButton: {
+    backgroundColor: '#FF6B6B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  createOrderButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  ordersContainer: {
+    flex: 1,
   },
 }); 

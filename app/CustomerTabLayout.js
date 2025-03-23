@@ -65,6 +65,14 @@ export default function CustomerTabLayout() {
           title: 'Profile',
         }}
       />
+      <Tab.Screen 
+        name="BrowseMeals" 
+        component={BrowseMealsScreen}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
     </Tab.Navigator>
   );
 } 

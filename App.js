@@ -12,6 +12,8 @@ import AddMenuScreen from './app/chef/AddMenuScreen';
 import AddSubscriptionScreen from './app/chef/AddSubscriptionScreen';
 import TransactionScreen from './app/customer/TransactionScreen';
 import FeedbackScreen from './app/customer/FeedbackScreen';
+import OrderHistoryScreen from './app/chef/OrderHistoryScreen';
+import ChefMenu from './app/chef/ChefMenu';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +32,8 @@ export default function App() {
         <Stack.Screen name="AddSubscription" component={AddSubscriptionScreen} />
         <Stack.Screen name="Transaction" component={TransactionScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
+        <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+        <Stack.Screen name="ChefMenu" component={ChefMenu} />
       </Stack.Navigator>
     </NavigationContainer>
   );

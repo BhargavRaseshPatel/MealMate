@@ -1,25 +1,56 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 
 export default function FutureOrdersScreen() {
+  const [activeTab, setActiveTab] = useState('subscription');
+
+  const renderContent = () => {
+    if (activeTab === 'subscription') {
+      return (
+        <View style={styles.tabContent}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No future subscription orders</Text>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.tabContent}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No future orders</Text>
+          </View>
+        </View>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Future Orders</Text>
       </View>
+      
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'subscription' && styles.activeTab]}
+          onPress={() => setActiveTab('subscription')}
+        >
+          <Text style={[styles.tabText, activeTab === 'subscription' && styles.activeTabText]}>
+            Subscription Orders
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'future' && styles.activeTab]}
+          onPress={() => setActiveTab('future')}
+        >
+          <Text style={[styles.tabText, activeTab === 'future' && styles.activeTabText]}>
+            Future Orders
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView style={styles.scrollView}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tomorrow's Orders</Text>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No orders for tomorrow</Text>
-          </View>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Upcoming Subscription Orders</Text>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No upcoming subscription orders</Text>
-          </View>
-        </View>
+        {renderContent()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -40,19 +71,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  scrollView: {
-    flex: 1,
-  },
-  section: {
-    padding: 20,
+  tabContainer: {
+    flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  sectionTitle: {
-    fontSize: 18,
+  tab: {
+    flex: 1,
+    paddingVertical: 15,
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  activeTab: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 2,
+    borderBottomColor: '#FF6B6B',
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: '#FF6B6B',
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  tabContent: {
+    padding: 20,
   },
   emptyState: {
     padding: 20,

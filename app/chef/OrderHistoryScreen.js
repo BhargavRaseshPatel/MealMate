@@ -1,10 +1,27 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function OrderHistoryScreen() {
+export default function OrderHistoryScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleBack}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.title}>Order History</Text>
       </View>
       <ScrollView style={styles.scrollView}>
@@ -31,9 +48,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 8,
   },
   title: {
     fontSize: 24,

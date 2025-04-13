@@ -14,7 +14,7 @@ export default function OrderHistoryScreen() {
       items: ['Butter Chicken', 'Naan', 'Rice'],
       status: 'Delivered',
       chef: 'Chef Raj',
-      amount: '₹450',
+      amount: '$450',
       rating: 4.5,
     },
     {
@@ -24,7 +24,7 @@ export default function OrderHistoryScreen() {
       items: ['Paneer Tikka', 'Roti', 'Dal'],
       status: 'Delivered',
       chef: 'Chef Priya',
-      amount: '₹350',
+      amount: '$350',
       rating: 5,
     },
     {
@@ -34,7 +34,7 @@ export default function OrderHistoryScreen() {
       items: ['Biryani', 'Raita', 'Salad'],
       status: 'Cancelled',
       chef: 'Chef Amit',
-      amount: '₹400',
+      amount: '$400',
       rating: null,
     },
   ];

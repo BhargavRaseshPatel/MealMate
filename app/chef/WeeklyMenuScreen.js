@@ -1,40 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { format, addDays, isToday, isSameDay } from 'date-fns';
+import { format, addDays, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { databases, account } from '../../services/appwrite';
+import { Query, ID } from 'appwrite';
+
+const DATABASE_ID = process.env.EXPO_PUBLIC_DATABASE_ID;
+const WEEKLY_MENU_COLLECTION_ID = process.env.EXPO_PUBLIC_COLLECTION_ID_WEEKLY_MENU;
+const CHEF_MENU_COLLECTION_ID = 'Chef_Menu';
 
 export default function WeeklyMenuScreen({ navigation }) {
   const [weeklyMenus, setWeeklyMenus] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchWeeklyMenus();
   }, []);
 
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchWeeklyMenus().finally(() => {
+      setRefreshing(false);
+    });
+  }, []);
+
   const fetchWeeklyMenus = async () => {
     try {
-      // TODO: Implement API call to fetch weekly menus
-      // For now, using dummy data
+      setLoading(true);
+      const currentUser = await account.get();
+      
+      if (!currentUser) {
+        Alert.alert('Error', 'User not authenticated');
+        return;
+      }
+
+      // Get the start and end of the current week
       const today = new Date();
-      const dummyMenus = Array.from({ length: 7 }, (_, index) => {
-        const date = addDays(today, index);
+      const weekStart = startOfWeek(today);
+      const weekEnd = endOfWeek(today);
+
+      console.log('Fetching weekly menus from:', weekStart.toISOString(), 'to:', weekEnd.toISOString());
+
+      // Fetch weekly menus for the current week
+      const weeklyMenusQuery = await databases.listDocuments(
+        DATABASE_ID,
+        WEEKLY_MENU_COLLECTION_ID,
+        [
+          Query.greaterThanEqual('menu_date', weekStart.toISOString()),
+          Query.lessThanEqual('menu_date', weekEnd.toISOString())
+        ]
+      );
+
+      console.log('Fetched weekly menus:', weeklyMenusQuery.documents);
+
+      // Create an array of all days in the week
+      const weekDays = Array.from({ length: 7 }, (_, index) => {
+        const date = addDays(weekStart, index);
         return {
-          id: `menu-${index}`,
+          id: `day-${index}`,
           date: date,
-          chef_menu: index === 0 ? {
-            chef_menu_id: '1',
-            menu_name: 'Butter Chicken',
-            description: 'Tender chicken in rich tomato gravy',
-            category: 'Main Course',
-            chefItems: [
-              { name: 'Chicken', quantity: '500g' },
-              { name: 'Tomato Sauce', quantity: '200ml' },
-              { name: 'Spices', quantity: 'As per taste' }
-            ]
-          } : null
+          chef_menus: [] // Changed to array to handle multiple menus
         };
       });
-      setWeeklyMenus(dummyMenus);
+
+      // Process the fetched weekly menus
+      for (const weeklyMenu of weeklyMenusQuery.documents) {
+        console.log('Processing weekly menu:', weeklyMenu);
+        const menuDate = new Date(weeklyMenu.menu_date);
+        const dayIndex = weekDays.findIndex(day => 
+          isSameDay(day.date, menuDate)
+        );
+
+        console.log('Found day index:', dayIndex, 'for date:', menuDate);
+
+        if (dayIndex !== -1 && weeklyMenu.chefMenu && weeklyMenu.chefMenu.length > 0) {
+          try {
+            // Process each chef menu in the relationship
+            for (const chefMenuDoc of weeklyMenu.chefMenu) {
+              if (chefMenuDoc && chefMenuDoc.$id) {
+                const menuData = {
+                  chef_menu_id: chefMenuDoc.$id,
+                  menu_name: chefMenuDoc.menu_name,
+                  description: chefMenuDoc.description,
+                  category: chefMenuDoc.category?.category_name || 'Uncategorized',
+                  chefItems: chefMenuDoc.chefItem || []
+                };
+                weekDays[dayIndex].chef_menus.push(menuData);
+                console.log('Added chef menu to day:', menuData);
+              }
+            }
+          } catch (error) {
+            console.error('Error processing chef menu:', error);
+            continue;
+          }
+        }
+      }
+
+      console.log('Final weekDays array:', weekDays);
+      setWeeklyMenus(weekDays);
     } catch (error) {
       console.error('Error fetching weekly menus:', error);
       Alert.alert('Error', 'Failed to load weekly menus');
@@ -45,62 +109,45 @@ export default function WeeklyMenuScreen({ navigation }) {
 
   const handleAddMenu = (date) => {
     navigation.navigate('ChefMenu', { 
-      date,
-      onMenuSelected: (selectedMenu) => {
-        // Create a weekly menu entry with the selected chef menu
-        const weeklyMenuEntry = {
-          weekly_menu_id: `weekly-${Date.now()}`, // Generate a unique ID
-          menu_date: date,
-          chef_menu_id: selectedMenu.chef_menu_id,
-          chef_menu: selectedMenu // Store the full menu data for display
-        };
-
-        // Update the weekly menu with the new entry
-        setWeeklyMenus(prevMenus => 
-          prevMenus.map(menu => 
-            isSameDay(menu.date, date) 
-              ? { ...menu, chef_menu: selectedMenu }
-              : menu
-          )
-        );
+      date: date.toISOString(),
+      onMenuSelected: () => {
+        // Refresh the weekly menus after adding a new one
+        fetchWeeklyMenus();
       }
     });
   };
 
   const handleAddWeeklyMenu = () => {
-    navigation.navigate('ChefMenu', { 
-      isWeekly: true,
-      onMenuSelected: (selectedMenu) => {
-        // Create weekly menu entries for all empty days
-        const today = new Date();
-        const weeklyMenuEntries = Array.from({ length: 7 }, (_, index) => {
-          const date = addDays(today, index);
-          return {
-            weekly_menu_id: `weekly-${Date.now()}-${index}`,
-            menu_date: date,
-            chef_menu_id: selectedMenu.chef_menu_id,
-            chef_menu: selectedMenu
-          };
-        });
-
-        // Update all empty days with the selected menu
-        setWeeklyMenus(prevMenus => 
-          prevMenus.map(menu => 
-            !menu.chef_menu ? { ...menu, chef_menu: selectedMenu } : menu
-          )
-        );
+    navigation.navigate('ChefMenuList', { 
+      onMenuSelected: () => {
+        // Refresh the weekly menus after adding a new one
+        fetchWeeklyMenus();
       }
     });
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Weekly Menu</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B6B" />
+          <Text style={styles.loadingText}>Loading menus...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const renderMenuCard = (menuData) => {
     const isTodayMenu = isToday(menuData.date);
-    const hasMenu = menuData.chef_menu && Object.keys(menuData.chef_menu).length > 0;
+    const hasMenus = menuData.chef_menus && menuData.chef_menus.length > 0;
 
     return (
       <TouchableOpacity 
         style={[styles.menuCard, isTodayMenu && styles.todayMenuCard]}
-        onPress={() => hasMenu ? null : handleAddMenu(menuData.date)}
+        onPress={() => hasMenus ? null : handleAddMenu(menuData.date)}
       >
         <View style={styles.menuHeader}>
           <Text style={[styles.dateText, isTodayMenu && styles.todayDateText]}>
@@ -113,23 +160,27 @@ export default function WeeklyMenuScreen({ navigation }) {
           )}
         </View>
         
-        {hasMenu && menuData.chef_menu ? (
+        {hasMenus ? (
           <View style={styles.menuContent}>
-            <Text style={styles.menuName}>{menuData.chef_menu.menu_name || 'Unnamed Menu'}</Text>
-            <Text style={styles.menuCategory}>{menuData.chef_menu.category || 'Uncategorized'}</Text>
-            <Text style={styles.menuDescription}>{menuData.chef_menu.description || 'No description available'}</Text>
-            
-            {menuData.chef_menu.chefItems && menuData.chef_menu.chefItems.length > 0 && (
-              <View style={styles.ingredientsContainer}>
-                <Text style={styles.ingredientsTitle}>Ingredients:</Text>
-                {menuData.chef_menu.chefItems.map((item, index) => (
-                  <View key={index} style={styles.ingredientItem}>
-                    <Text style={styles.ingredientName}>{item.name || 'Unnamed Item'}</Text>
-                    <Text style={styles.ingredientQuantity}>{item.quantity || 'N/A'}</Text>
+            {menuData.chef_menus.map((menu, index) => (
+              <View key={`${menu.chef_menu_id}-${index}`} style={[styles.menuItem, index > 0 && styles.menuItemBorder]}>
+                <Text style={styles.menuName}>{menu.menu_name || 'Unnamed Menu'}</Text>
+                <Text style={styles.menuCategory}>{menu.category || 'Uncategorized'}</Text>
+                <Text style={styles.menuDescription}>{menu.description || 'No description available'}</Text>
+                
+                {menu.chefItems && menu.chefItems.length > 0 && (
+                  <View style={styles.ingredientsContainer}>
+                    <Text style={styles.ingredientsTitle}>Ingredients:</Text>
+                    {menu.chefItems.map((item, itemIndex) => (
+                      <View key={`${menu.chef_menu_id}-item-${itemIndex}`} style={styles.ingredientItem}>
+                        <Text style={styles.ingredientName}>{item.chef_item_name || 'Unnamed Item'}</Text>
+                        <Text style={styles.ingredientQuantity}>{item.quantity || 'N/A'}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
+                )}
               </View>
-            )}
+            ))}
           </View>
         ) : (
           <TouchableOpacity 
@@ -153,11 +204,22 @@ export default function WeeklyMenuScreen({ navigation }) {
           onPress={handleAddWeeklyMenu}
         >
           <Ionicons name="add-circle-outline" size={24} color="#fff" />
-          <Text style={styles.addWeeklyButtonText}>Add Weekly Menu</Text>
+          <Text style={styles.addWeeklyButtonText}>Chef Menu</Text>
         </TouchableOpacity>
       </View>
       
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#FF6B6B']}
+            tintColor="#FF6B6B"
+            progressBackgroundColor="#ffffff"
+          />
+        }
+      >
         {weeklyMenus.map((menu) => (
           <View key={menu.id} style={styles.menuContainer}>
             {renderMenuCard(menu)}
@@ -214,13 +276,23 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   todayMenuCard: {
     borderColor: '#FF6B6B',
-    borderWidth: 2,
+    borderWidth: 2.5,
+    shadowColor: '#FF6B6B',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
   menuHeader: {
     flexDirection: 'row',
@@ -307,5 +379,24 @@ const styles = StyleSheet.create({
     color: '#FF6B6B',
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  menuItem: {
+    marginBottom: 16,
+  },
+  menuItemBorder: {
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
 }); 

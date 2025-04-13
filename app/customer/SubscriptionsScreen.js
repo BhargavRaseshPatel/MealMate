@@ -198,7 +198,7 @@ export default function SubscriptionsScreen() {
           </View>
           <View style={styles.itemRow}>
             <Ionicons name="cash-outline" size={16} color="#666" />
-            <Text style={styles.itemText}>Price: ₹{subscription.price}</Text>
+            <Text style={styles.itemText}>Price: ${subscription.price}</Text>
           </View>
           {subscription.discount > 0 && (
             <View style={styles.itemRow}>

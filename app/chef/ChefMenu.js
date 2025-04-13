@@ -3,16 +3,17 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Ale
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { databases, account } from '../../services/appwrite';
-import { Query } from 'appwrite';
+import { Query, ID } from 'appwrite';
 
 const DATABASE_ID = process.env.EXPO_PUBLIC_DATABASE_ID;
 const CHEF_MENU_COLLECTION_ID = 'Chef_Menu';
-const CHEF_ITEMS_COLLECTION_ID = process.env.EXPO_PUBLIC_COLLECTION_ID_CHEF_ITEMS;
+const CHEF_COLLECTION_ID = process.env.EXPO_PUBLIC_COLLECTION_ID_CHEF;
+const WEEKLY_MENU_COLLECTION_ID = process.env.EXPO_PUBLIC_COLLECTION_ID_WEEKLY_MENU;
 
 export default function ChefMenu({ navigation, route }) {
   const [chefMenus, setChefMenus] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { date, isWeekly } = route.params || {};
+  const { date } = route.params || {};
   const formattedDate = date ? format(new Date(date), 'MMM d, yyyy') : '';
 
   useEffect(() => {
@@ -34,45 +35,43 @@ export default function ChefMenu({ navigation, route }) {
       console.log('Database ID:', DATABASE_ID);
       console.log('Chef Menu Collection ID:', CHEF_MENU_COLLECTION_ID);
 
-      // Query chef menus for the current chef
+      // First get the chef document for the current user
+      const chefQuery = await databases.listDocuments(
+        DATABASE_ID,
+        CHEF_COLLECTION_ID,
+        [Query.equal('person_id', currentUser.$id)]
+      );
+
+      if (chefQuery.documents.length === 0) {
+        Alert.alert('Error', 'Chef profile not found');
+        navigation.goBack();
+        return;
+      }
+
+      const chefId = chefQuery.documents[0].$id;
+      console.log('Chef ID:', chefId);
+
+      // Now query chef menus using the chef's ID
       const menus = await databases.listDocuments(
         DATABASE_ID,
         CHEF_MENU_COLLECTION_ID,
-        [
-          Query.equal('chef', currentUser.$id)
-        ]
+        [Query.equal('chef', chefId)]
       );
 
       console.log('Fetched Menus:', menus.documents);
 
-      const menusWithItems = await Promise.all(
-        menus.documents.map(async (menu) => {
-          // Fetch chef items for this menu
-          const items = await databases.listDocuments(
-            DATABASE_ID,
-            CHEF_ITEMS_COLLECTION_ID,
-            [
-              Query.equal('chef_menu_id', menu.$id)
-            ]
-          );
-
-          console.log('Menu Items for', menu.menu_name, ':', items.documents);
-
-          return {
-            chef_menu_id: menu.$id,
-            menu_name: menu.menu_name,
-            description: menu.description,
-            category: menu.category,
-            chefItems: items.documents.map(item => ({
-              name: item.name,
-              quantity: item.quantity
-            }))
-          };
-        })
-      );
+      // Process the menus - chefItem is already included in the menu document
+      const processedMenus = menus.documents.map(menu => ({
+        chefMenu: menu.$id,
+        menu_name: menu.menu_name,
+        description: menu.description,
+        category: menu.category.category_name,
+        price: menu.price,
+        chefItems: menu.chefItem || [] // chefItem is a relationship field
+      }));
       
-      console.log('Final Menus with Items:', menusWithItems);
-      setChefMenus(menusWithItems);
+      console.log('Processed Menus:', processedMenus);
+      setChefMenus(processedMenus);
     } catch (error) {
       console.error('Error fetching chef menus:', error);
       Alert.alert('Error', 'Failed to load chef menus');
@@ -81,10 +80,25 @@ export default function ChefMenu({ navigation, route }) {
     }
   };
 
-  const handleMenuSelect = (menu) => {
-    // Use navigation.setParams to update the selected menu
-    navigation.setParams({ selectedMenu: menu });
-    navigation.goBack();
+  const handleMenuSelect = async (menu) => {
+    try {
+      // Create weekly menu entry with just the required fields
+      await databases.createDocument(
+        DATABASE_ID,
+        WEEKLY_MENU_COLLECTION_ID,
+        ID.unique(),
+        {
+          chefMenu: [menu.chefMenu], // Wrap the ID in an array for relationship field
+          menu_date: date || new Date().toISOString()
+        }
+      );
+
+      Alert.alert('Success', 'Menu added to weekly menu successfully!');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error adding menu to weekly menu:', error);
+      Alert.alert('Error', 'Failed to add menu to weekly menu');
+    }
   };
 
   const handleCreateMenu = () => {
@@ -102,7 +116,7 @@ export default function ChefMenu({ navigation, route }) {
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <Text style={styles.title}>
-            {isWeekly ? 'Select Menu for Week' : `Select Menu for ${formattedDate}`}
+            Select Menu for {formattedDate}
           </Text>
           <TouchableOpacity 
             style={styles.addButton}
@@ -129,7 +143,7 @@ export default function ChefMenu({ navigation, route }) {
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          {isWeekly ? 'Select Menu for Week' : `Select Menu for ${formattedDate}`}
+          Select Menu for {formattedDate}
         </Text>
         <TouchableOpacity 
           style={styles.addButton}
@@ -154,13 +168,14 @@ export default function ChefMenu({ navigation, route }) {
         ) : (
           chefMenus.map((menu) => (
             <TouchableOpacity
-              key={menu.chef_menu_id}
+              key={menu.chefMenu}
               style={styles.menuCard}
               onPress={() => handleMenuSelect(menu)}
             >
               <View style={styles.menuHeader}>
                 <Text style={styles.menuName}>{menu.menu_name}</Text>
                 <Text style={styles.menuCategory}>{menu.category}</Text>
+                <Text style={styles.menuPrice}>${menu.price}</Text>
               </View>
               
               <Text style={styles.menuDescription}>{menu.description}</Text>
@@ -170,7 +185,7 @@ export default function ChefMenu({ navigation, route }) {
                   <Text style={styles.ingredientsTitle}>Ingredients:</Text>
                   {menu.chefItems.map((item, index) => (
                     <View key={index} style={styles.ingredientItem}>
-                      <Text style={styles.ingredientName}>{item.name}</Text>
+                      <Text style={styles.ingredientName}>{item.chef_item_name}</Text>
                       <Text style={styles.ingredientQuantity}>{item.quantity}</Text>
                     </View>
                   ))}
@@ -270,6 +285,12 @@ const styles = StyleSheet.create({
   menuCategory: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 4,
+  },
+  menuPrice: {
+    fontSize: 16,
+    color: '#FF6B6B',
+    fontWeight: '600',
   },
   menuDescription: {
     fontSize: 14,

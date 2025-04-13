@@ -50,6 +50,10 @@ export default function ChefProfileScreen({ navigation }) {
     navigation.navigate('OrderHistory');
   };
 
+  const handleSubscriptions = () => {
+    navigation.navigate('MenuSubscription');
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -82,7 +86,7 @@ export default function ChefProfileScreen({ navigation }) {
             <Ionicons name="wallet-outline" size={24} color="#FF6B6B" />
             <View style={styles.walletTextContainer}>
               <Text style={styles.walletLabel}>Wallet Balance</Text>
-              <Text style={styles.walletAmount}>₹{userData?.wallet}</Text>
+              <Text style={styles.walletAmount}>${userData?.wallet}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.addMoneyButton}>
@@ -116,6 +120,17 @@ export default function ChefProfileScreen({ navigation }) {
           <View style={styles.actionButtonContent}>
             <Ionicons name="time-outline" size={24} color="#FF6B6B" />
             <Text style={styles.actionButtonText}>Order History</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={handleSubscriptions}
+        >
+          <View style={styles.actionButtonContent}>
+            <Ionicons name="restaurant-outline" size={24} color="#FF6B6B" />
+            <Text style={styles.actionButtonText}>Menu & Subscriptions</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#666" />
         </TouchableOpacity>

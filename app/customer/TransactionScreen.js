@@ -76,9 +76,9 @@ export default function TransactionScreen({ navigation }) {
         </View>
         <Text style={[
           styles.transactionAmount,
-          { color: getTransactionColor(item.type) }
+          item.type.toLowerCase() === 'credit' ? styles.creditAmount : styles.debitAmount
         ]}>
-          {item.type.toLowerCase() === 'credit' ? '+' : '-'}₹{item.amount}
+          {item.type.toLowerCase() === 'credit' ? '+' : '-'}${item.amount}
         </Text>
       </View>
       <View style={styles.transactionFooter}>
@@ -232,5 +232,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     color: '#666',
+  },
+  creditAmount: {
+    color: '#4CAF50',
+  },
+  debitAmount: {
+    color: '#F44336',
   },
 }); 

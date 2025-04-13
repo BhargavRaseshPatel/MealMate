@@ -5,10 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 // Import screens
 import ChefHomeScreen from './chef/ChefHomeScreen';
 import FutureOrdersScreen from './chef/FutureOrdersScreen';
-import MenuSubscriptionScreen from './chef/MenuSubscriptionScreen';
 import WeeklyMenuScreen from './chef/WeeklyMenuScreen';
 import ChefProfileScreen from './chef/ChefProfileScreen';
 import OrderHistoryScreen from './chef/OrderHistoryScreen';
+import MenuSubscriptionScreen from './chef/MenuSubscriptionScreen';
+import AddSubscriptionScreen from './chef/AddSubscriptionScreen';
+import ChefMenuListScreen from './chef/ChefMenuListScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,8 +25,6 @@ export default function ChefTabLayout() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'FutureOrders') {
             iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'MenuSubscription') {
-            iconName = focused ? 'restaurant' : 'restaurant-outline';
           } else if (route.name === 'WeeklyMenu') {
             iconName = focused ? 'list' : 'list-outline';
           } else if (route.name === 'ChefProfile') {
@@ -49,11 +49,6 @@ export default function ChefTabLayout() {
         options={{ title: 'Future Orders' }}
       />
       <Tab.Screen 
-        name="MenuSubscription" 
-        component={MenuSubscriptionScreen}
-        options={{ title: 'Menu & Subscriptions' }}
-      />
-      <Tab.Screen 
         name="WeeklyMenu" 
         component={WeeklyMenuScreen}
         options={{ title: 'Weekly Menu' }}
@@ -66,6 +61,30 @@ export default function ChefTabLayout() {
       <Tab.Screen 
         name="OrderHistory" 
         component={OrderHistoryScreen}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+      <Tab.Screen 
+        name="MenuSubscription" 
+        component={MenuSubscriptionScreen}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+      <Tab.Screen 
+        name="AddSubscription" 
+        component={AddSubscriptionScreen}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+      <Tab.Screen 
+        name="ChefMenuList" 
+        component={ChefMenuListScreen}
         options={{
           tabBarButton: () => null,
           tabBarStyle: { display: 'none' },

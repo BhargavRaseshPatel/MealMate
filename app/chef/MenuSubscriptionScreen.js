@@ -197,6 +197,12 @@ export default function MenuSubscriptionScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.title}>Menu & Subscriptions</Text>
       </View>
       <ScrollView style={styles.scrollView}>
@@ -399,6 +405,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -407,6 +415,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    marginLeft: 10,
   },
   scrollView: {
     flex: 1,
@@ -629,5 +638,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#fff',
     fontWeight: '500',
+  },
+  backButton: {
+    padding: 5,
+    marginRight: 10,
   },
 }); 
